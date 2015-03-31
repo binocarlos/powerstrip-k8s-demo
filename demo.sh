@@ -20,3 +20,7 @@ echo "running frontend-service"
 sudo kubectl create -f /vagrant/examples/guestbook/frontend-service.json
 echo "listing pods"
 sudo kubectl get pods
+echo "listing rcs"
+sudo kubectl get rc
+echo "listing services"
+sudo kubectl get services
