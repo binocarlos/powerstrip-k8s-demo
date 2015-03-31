@@ -77,9 +77,6 @@ cmd-master() {
   activate-service flocker-control
   #write-service swarm
 
-  # set the DOCKER_HOST to point to swarm
-  echo DOCKER_HOST=localhost:2375 >> /etc/environment
-
   # start services
   supervisorctl reload
 
@@ -96,7 +93,6 @@ cmd-minion() {
   # include functions from the powerstrip lib
   . /srv/powerstrip-base-install/ubuntu/lib.sh
 
-  # write the labels to the docker deamon for the minion
   powerstrip-base-install-configure-docker $@
 
   sleep 2

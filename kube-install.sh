@@ -28,9 +28,9 @@ echo "####################################################################"
 echo "#################### Installing kubernetes $INSTALLER_TYPE #########"
 echo "####################################################################"
 
-export MASTER_IP=172.16.255.250
-export SLAVE1_IP=172.16.255.251
-export SLAVE2_IP=172.16.255.252
+export MASTER_IP=`cat /etc/flocker/master_address`
+export SLAVE1_IP=`cat /etc/flocker/slave1_address`
+export SLAVE2_IP=`cat /etc/flocker/slave2_address`
 export KUBERNETES_RELEASE_VERSION=v0.13.2
 export ETCD_VERSION=v2.0.5
 export KUBERNETES_CLUSTER_ID=democluster

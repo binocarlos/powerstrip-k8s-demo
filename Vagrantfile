@@ -32,6 +32,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 mkdir -p /etc/flocker
 echo 172.16.255.251 > /etc/flocker/my_address
 echo 172.16.255.250 > /etc/flocker/master_address
+echo 172.16.255.251 > /etc/flocker/slave1_address
+echo 172.16.255.252 > /etc/flocker/slave2_address
 echo node1 > /etc/flocker/hostname
 bash /vagrant/install.sh minion --label storage=disk
 SCRIPT
@@ -47,6 +49,8 @@ SCRIPT
 mkdir -p /etc/flocker
 echo 172.16.255.252 > /etc/flocker/my_address
 echo 172.16.255.250 > /etc/flocker/master_address
+echo 172.16.255.251 > /etc/flocker/slave1_address
+echo 172.16.255.252 > /etc/flocker/slave2_address
 echo 172.16.255.251 > /etc/flocker/peer_address
 echo node2 > /etc/flocker/hostname
 bash /vagrant/install.sh minion --label storage=ssd
@@ -63,6 +67,8 @@ SCRIPT
 mkdir -p /etc/flocker
 echo 172.16.255.250 > /etc/flocker/my_address
 echo 172.16.255.250 > /etc/flocker/master_address
+echo 172.16.255.251 > /etc/flocker/slave1_address
+echo 172.16.255.252 > /etc/flocker/slave2_address
 echo 172.16.255.251:2375,172.16.255.252:2375 > /etc/flocker/swarmips
 echo master > /etc/flocker/hostname
 bash /vagrant/install.sh master
