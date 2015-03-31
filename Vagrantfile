@@ -37,7 +37,7 @@ echo 172.16.255.252 > /etc/flocker/slave2_address
 echo 10.2.2.1/24 > /etc/flocker/bridge_address
 echo 10.2.0.0/16 > /etc/flocker/breakout_address
 echo node1 > /etc/flocker/hostname
-#bash /vagrant/install.sh minion --label storage=disk
+bash /vagrant/install.sh minion --label storage=disk
 SCRIPT
   end
 
@@ -57,7 +57,7 @@ echo 172.16.255.251 > /etc/flocker/peer_address
 echo 10.2.3.1/24 > /etc/flocker/bridge_address
 echo 10.2.0.0/16 > /etc/flocker/breakout_address
 echo node2 > /etc/flocker/hostname
-#bash /vagrant/install.sh minion --label storage=ssd
+bash /vagrant/install.sh minion --label storage=ssd
 SCRIPT
   end
 
@@ -77,7 +77,7 @@ echo 172.16.255.251:2375,172.16.255.252:2375 > /etc/flocker/swarmips
 echo 10.2.1.1/24 > /etc/flocker/bridge_address
 echo 10.2.0.0/16 > /etc/flocker/breakout_address
 echo master > /etc/flocker/hostname
-#bash /vagrant/install.sh master
+bash /vagrant/install.sh master
 SCRIPT
   end
 
