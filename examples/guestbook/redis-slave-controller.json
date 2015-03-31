@@ -12,7 +12,7 @@
            "id": "redis-slave",
            "containers": [{
              "name": "redis-slave",
-             "image": "binocarlos/powerstrip-k8s-demo-redis-slave",
+             "image": "binocarlos/powerstrip-k8s-demo:redis-slave",
              "ports": [{"containerPort": 6379}]
            }]
          }
