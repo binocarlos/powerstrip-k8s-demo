@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-redis-server --slaveof redis-master 6379
+redis-server --slaveof $REDIS_MASTER_PORT_6379_TCP_ADDR 6379
