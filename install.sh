@@ -6,6 +6,9 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+export BRIDGE_ADDRESS=`cat /etc/flocker/bridge_address`
+export BREAKOUT_ADDRESS=`cat /etc/flocker/breakout_address`
+
 # install swarm on the master
 # the actual boot command for the powerstrip-weave adapter
 # we run without -d so that process manager can manage the process properly
@@ -43,6 +46,27 @@ activate-service() {
   bash /srv/powerstrip-base-install/ubuntu/install.sh service $1
 }
 
+# here we are preparing the system for weave based k8s
+install-weave() {
+  mkdir -p /opt/bin/
+  curl \
+    --silent \
+    --location \
+    https://github.com/zettio/weave/releases/download/latest_release/weave \
+    --output /opt/bin/weave
+  curl \
+    --silent \
+    --location \
+    https://raw.github.com/errordeveloper/weave-demos/master/poseidon/weave-helper \
+    --output /opt/bin/weave-helper
+  chmod +x /opt/bin/weave
+  chmod +x /opt/bin/weave-helper
+  /opt/bin/weave create-bridge
+  ip addr add dev weave $BRIDGE_ADDRESS
+  ip route add $BREAKOUT_ADDRESS dev weave scope link
+  ip route add 224.0.0.0/4 dev weave
+}
+
 # basic setup such as copy this script to /srv
 init() {
   cp -f /vagrant/install.sh /srv/install.sh
@@ -57,6 +81,16 @@ init() {
   chmod 600 /root/.ssh/id_rsa
   chown root:root /root/.ssh/id_rsa
   cat /vagrant/insecure_public_key >> /root/.ssh/authorized_keys
+
+  # include functions from the powerstrip lib
+  . /srv/powerstrip-base-install/ubuntu/lib.sh
+
+  # install / configure the weave bridge
+  install-weave
+
+  powerstrip-base-install-configure-docker --bridge="weave" $@
+
+  sleep 2
 }
 
 # here we build ontop of powerstrip-base-install and get swarm working on top
@@ -64,10 +98,7 @@ init() {
 cmd-master() {
 
   # init copies the SSH keys and copies this script so it can be referenced by the supervisor scripts
-  init
-
-  # include functions from the powerstrip lib
-  . /srv/powerstrip-base-install/ubuntu/lib.sh
+  init $@
 
   # pull master images
   #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages master
@@ -88,14 +119,7 @@ cmd-master() {
 cmd-minion() {
 
   # init copies the SSH keys and copies this script so it can be referenced by the supervisor scripts
-  init
-
-  # include functions from the powerstrip lib
-  . /srv/powerstrip-base-install/ubuntu/lib.sh
-
-  powerstrip-base-install-configure-docker $@
-
-  sleep 2
+  init $@
 
   # pull minion images
   #powerstrip-base-install-pullimage ubuntu:latest
