@@ -4,7 +4,7 @@
   "apiVersion": "v1beta1",
   "port": 8000,
   "containerPort": "http-server",
-  "publicIPs": [],
+  "publicIPs": ["172.16.255.251", "172.16.255.252"],
   "selector": {
     "name": "frontend"
   },
