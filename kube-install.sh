@@ -178,7 +178,7 @@ update_services_config() {
 
     # update kube-proxy config
     echo "KUBE_PROXY=$KUBERNETES_EXECUTABLE_LOCATION/kube-proxy" | sudo tee -a  /etc/default/kube-proxy
-    echo -e "KUBE_PROXY_OPTS=\"--etcd_servers=http://$KUBERNETES_MASTER_HOSTNAME:4001 --master=$KUBERNETES_MASTER_HOSTNAME:8080 --logtostderr=true \"" | sudo tee -a /etc/default/kube-proxy
+    echo -e "KUBE_PROXY_OPTS=\"--etcd_servers=http://$KUBERNETES_MASTER_HOSTNAME:4001 --master=http://$KUBERNETES_MASTER_HOSTNAME:8080 --logtostderr=true \"" | sudo tee -a /etc/default/kube-proxy
     echo "kube-proxy config updated successfully"
   fi
 }
