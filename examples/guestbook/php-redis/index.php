@@ -17,6 +17,7 @@ if (isset($_GET['cmd']) === true) {
     ]);
     
     $client->set($_GET['key'], $_GET['value']);
+    $client->save();
     print('{"message": "Updated"}');
   } else {
     $client = new Predis\Client([

@@ -9,27 +9,6 @@ fi
 export BRIDGE_ADDRESS=`cat /etc/flocker/bridge_address`
 export BREAKOUT_ADDRESS=`cat /etc/flocker/breakout_address`
 
-# install swarm on the master
-# the actual boot command for the powerstrip-weave adapter
-# we run without -d so that process manager can manage the process properly
-cmd-swarm() {
-  . /srv/powerstrip-base-install/ubuntu/lib.sh
-  powerstrip-base-install-stop-container swarm
-  DOCKER_HOST="unix:///var/run/docker.real.sock" \
-  docker run --name swarm \
-    -p 2375:2375 \
-    swarm manage -H 0.0.0.0:2375 `cat /etc/flocker/swarmips`
-}
-
-
-# install the tcp tunnel on the minions
-# wait for the powerstrip container to start because it will produce the docker.sock
-cmd-tcptunnel() {
-  . /srv/powerstrip-base-install/ubuntu/lib.sh
-  powerstrip-base-install-wait-for-container powerstrip
-  socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CLIENT:/var/run/docker.sock
-}
-
 # a local way of writing a supervisor script
 write-service() {
   local service="$1";
@@ -101,7 +80,7 @@ cmd-master() {
   init $@
 
   # pull master images
-  #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages master
+  bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages master
   #powerstrip-base-install-pullimage swarm
 
   # get the control + swarm to work
@@ -112,6 +91,24 @@ cmd-master() {
   supervisorctl reload
 
   bash /vagrant/kube-install.sh master
+  sleep 5
+
+  # wait for the nodes to be up and then label them
+  local node1=`sudo kubectl get nodes | grep democluster-node1`
+  local node2=`sudo kubectl get nodes | grep democluster-node2`
+
+  while [[ -z "$node1" ]]; do
+    node1=`sudo kubectl get nodes | grep democluster-node1`
+    sleep 1
+  done
+
+  while [[ -z "$node2" ]]; do
+    node2=`sudo kubectl get nodes | grep democluster-node2`
+    sleep 1
+  done
+
+  kubectl label --overwrite nodes democluster-node1 disktype=spinning
+  kubectl label --overwrite nodes democluster-node2 disktype=ssd
 }
 
 # /etc/flocker/my_address
@@ -121,11 +118,27 @@ cmd-minion() {
   # init copies the SSH keys and copies this script so it can be referenced by the supervisor scripts
   init $@
 
+  # k8s does not use a specific docker version rather it just does
+  # POST /containers/create
+  cat << EOF > /etc/powerstrip-demo/adapters.yml
+version: 1
+endpoints:
+  "POST /*/containers/create":
+    pre: [flocker,weave]
+  "POST /*/containers/*/start":
+    post: [weave]
+  "POST /containers/create":
+    pre: [flocker,weave]
+  "POST /containers/*/start":
+    post: [weave]
+adapters:
+  flocker: http://flocker/flocker-adapter
+  weave: http://weave/weave-adapter
+EOF
+
   # pull minion images
   #powerstrip-base-install-pullimage ubuntu:latest
-  #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages minion
-  #powerstrip-base-install-pullimage binocarlos/multi-http-demo-api
-  #powerstrip-base-install-pullimage binocarlos/multi-http-demo-server
+  bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages minion
 
   # get the flocker / weave / powerstrip services to work
   activate-service flocker-zfs-agent
@@ -150,6 +163,27 @@ cmd-weave() {
     binocarlos/powerstrip-weave $@
 }
 
+cmd-debug() {
+  local addr=`cat /etc/flocker/my_address`
+  cat << EOF > /etc/powerstrip-demo/adapters.yml
+version: 1
+endpoints:
+  "POST /containers/create":
+    pre: [debug,flocker,weave,debug]
+  "POST /containers/*/start":
+    post: [debug,weave,debug]
+adapters:
+  flocker: http://flocker/flocker-adapter
+  weave: http://weave/weave-adapterde
+  debug: http://$addr:8086
+EOF
+  DOCKER_HOST=unix:///var/run/docker.real.sock docker pull binocarlos/powerstrip-debug
+  DOCKER_HOST=unix:///var/run/docker.real.sock docker run --name debug -d  -p 8086:80 binocarlos/powerstrip-debug
+  supervisorctl stop powerstrip
+  DOCKER_HOST=unix:///var/run/docker.real.sock docker rm -f powerstrip
+  supervisorctl start powerstrip
+}
+
 usage() {
 cat <<EOF
 Usage:
@@ -158,6 +192,7 @@ install.sh minion
 install.sh tcptunnel
 install.sh swarm
 install.sh weave
+install.sh debug
 install.sh help
 EOF
   exit 1
@@ -167,9 +202,8 @@ main() {
   case "$1" in
   master)                   shift; cmd-master $@;;
   minion)                   shift; cmd-minion $@;;
-  tcptunnel)                shift; cmd-tcptunnel $@;;
-  swarm)                    shift; cmd-swarm $@;;
   weave)                    shift; cmd-weave $@;;
+  debug)                    shift; cmd-debug $@;;
   *)                        usage $@;;
   esac
 }

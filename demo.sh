@@ -7,6 +7,8 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 cmd-ls() {
+  echo "listing nodes"
+  sudo kubectl get nodes
   echo "listing pods"
   sudo kubectl get pods
   echo "listing rcs"
@@ -21,13 +23,10 @@ cmd-up() {
   if [[ -z "$mode" ]]; then
     mode="spinning"
   fi
-  echo "label node1 as spinning disk"
-  sudo kubectl label --overwrite nodes democluster-node1 disktype=spinning
-  echo "label node1 as ssd disk"
-  sudo kubectl label --overwrite nodes democluster-node2 disktype=ssd
   echo "running redis-master-pod - $mode"
+  cat examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod.json
   # the redis-master is a pod because then we can use the nodeSelector field
-  sudo kubectl create -f /vagrant/examples/guestbook/redis-master-pod-$mode.json
+  sudo kubectl create -f /tmp/redis-master-pod.json
   echo "running redis-master-service"
   sudo kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
   echo "running redis-slave-controller"
@@ -47,10 +46,25 @@ cmd-down() {
   sudo kubectl get pods | awk 'NR!=1' | awk '{print $1}' | xargs sudo kubectl delete pod || true
   sudo kubectl get services | awk 'NR!=1' | awk '{print $1}' | grep -v "kubernetes" | xargs sudo kubectl delete service || true
   cmd-ls
+  sleep 5
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo bash /vagrant/demo.sh tidy
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node2 sudo bash /vagrant/demo.sh tidy
 }
 
 cmd-tidy() {
   sudo docker ps -a | grep Exited | grep -v "wait-for-weave" | awk '{print $1}' | xargs sudo docker rm
+}
+
+cmd-shift() {
+  local mode="ssd";
+  sudo kubectl delete pod redis-master-pod
+  sleep 5
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo bash /vagrant/demo.sh tidy
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node2 sudo bash /vagrant/demo.sh tidy
+  # there is a template for the redis master - we change a nodeSelector to co-ordinate the DB moving servers 
+  cat examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod.json
+  # the redis-master is a pod because then we can use the nodeSelector field
+  sudo kubectl create -f /tmp/redis-master-pod.json
 }
 
 usage() {
@@ -60,6 +74,7 @@ demo.sh up  <spinning|ssd>
 demo.sh down
 demo.sh ls
 demo.sh tidy
+demo.sh shift
 EOF
   exit 1
 }
@@ -70,6 +85,7 @@ main() {
   down)                     shift; cmd-down $@;;
   ls)                       shift; cmd-ls $@;;
   tidy)                     shift; cmd-tidy $@;;
+  shift)                    shift; cmd-shift $@;;
   *)                        usage $@;;
   esac
 }

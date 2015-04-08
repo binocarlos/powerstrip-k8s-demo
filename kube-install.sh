@@ -107,7 +107,7 @@ download_kubernetes_release() {
   cd $KUBERNETES_DOWNLOAD_PATH
   mkdir -p $KUBERNETES_EXTRACT_DIR
   kubernetes_download_url="https://github.com/GoogleCloudPlatform/kubernetes/releases/download/$KUBERNETES_RELEASE_VERSION/kubernetes.tar.gz";
-  sudo curl -L $kubernetes_download_url -o kubernetes.tar.gz;
+  sudo curl -sS -L $kubernetes_download_url -o kubernetes.tar.gz;
   sudo tar xzvf kubernetes.tar.gz -C $KUBERNETES_EXTRACT_DIR;
 }
 

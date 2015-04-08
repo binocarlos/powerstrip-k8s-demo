@@ -25,5 +25,6 @@ powerstrip-base-install-pullimages master
 powerstrip-base-install-pullimages minion
 powerstrip-base-install-powerstrip-config
 
+powerstrip-base-install-pullimage dockerfile/redis
 
 apt-get clean
