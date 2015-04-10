@@ -32,4 +32,5 @@ powerstrip-base-install-pullimage dockerfile/redis
 powerstrip-base-install-pullimage binocarlos/powerstrip-k8s-demo:frontend
 powerstrip-base-install-pullimage binocarlos/powerstrip-k8s-demo:redis-slave
 
+bash /vagrant/kube-download.sh
 apt-get clean
