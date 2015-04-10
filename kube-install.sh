@@ -59,7 +59,7 @@ update_services_config() {
   # the file, we just add the new config(s) at the end of the respective
   # files and do not touch the original configs
   echo 'Updating kubernetes services configs'
-  cd $KUBERNETES_DIR/cluster/ubuntu/
+  cd /vagrant/cluster/ubuntu/
   sudo ./util.sh
 
   if [[ $INSTALLER_TYPE == 'master' ]]; then

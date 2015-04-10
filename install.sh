@@ -50,11 +50,12 @@ install-weave() {
 init() {
   cp -f /vagrant/install.sh /srv/install.sh
 
-  apt-get remove -y puppet
-  apt-get remove -y chef
+  #apt-get remove -y puppet
+  #apt-get remove -y chef
 
   # pull any updates we have made to the powerstrip-base-install script
-  cd /srv/powerstrip-base-install && git pull
+  # also bring in the k8s version
+  cd /srv/powerstrip-base-install && git pull && git checkout k8s-compat
   echo "copying keys to /root/.ssh"
   cp /vagrant/insecure_private_key /root/.ssh/id_rsa
   chmod 600 /root/.ssh/id_rsa
