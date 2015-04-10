@@ -139,6 +139,8 @@ adapters:
   weave: http://weave/weave-adapter
 EOF
 
+  DOCKER_HOST=unix:///var/run/docker.real.sock docker pull binocarlos/powerstrip-k8s-demo:frontend
+
   # pull minion images
   #powerstrip-base-install-pullimage ubuntu:latest
   #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages minion
