@@ -61,6 +61,10 @@ init() {
   chown root:root /root/.ssh/id_rsa
   cat /vagrant/insecure_public_key >> /root/.ssh/authorized_keys
 
+  # we are using a certain branch of powerstrip-flocker (the k8s compatible one)
+  export POWERSTRIP_FLOCKER_IMAGE=clusterhq/powerstrip-flocker:k8s-compat
+  echo "POWERSTRIP_FLOCKER_IMAGE=clusterhq/powerstrip-flocker:k8s-compat" >> /etc/environment
+
   # include functions from the powerstrip lib
   . /srv/powerstrip-base-install/ubuntu/lib.sh
 
@@ -80,7 +84,7 @@ cmd-master() {
   init $@
 
   # pull master images
-  bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages master
+  #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages master
   #powerstrip-base-install-pullimage swarm
 
   # get the control + swarm to work
@@ -126,10 +130,12 @@ endpoints:
   "POST /*/containers/create":
     pre: [flocker,weave]
   "POST /*/containers/*/start":
+    pre: [flocker]
     post: [weave]
   "POST /containers/create":
     pre: [flocker,weave]
   "POST /containers/*/start":
+    pre: [flocker]
     post: [weave]
 adapters:
   flocker: http://flocker/flocker-adapter
@@ -138,7 +144,7 @@ EOF
 
   # pull minion images
   #powerstrip-base-install-pullimage ubuntu:latest
-  bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages minion
+  #bash /srv/powerstrip-base-install/ubuntu/install.sh pullimages minion
 
   # get the flocker / weave / powerstrip services to work
   activate-service flocker-zfs-agent
