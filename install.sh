@@ -61,10 +61,6 @@ init() {
   chown root:root /root/.ssh/id_rsa
   cat /vagrant/insecure_public_key >> /root/.ssh/authorized_keys
 
-  # we are using a certain branch of powerstrip-flocker (the k8s compatible one)
-  export POWERSTRIP_FLOCKER_IMAGE=clusterhq/powerstrip-flocker:k8s-compat
-  echo "POWERSTRIP_FLOCKER_IMAGE=clusterhq/powerstrip-flocker:k8s-compat" >> /etc/environment
-
   # include functions from the powerstrip lib
   . /srv/powerstrip-base-install/ubuntu/lib.sh
 
