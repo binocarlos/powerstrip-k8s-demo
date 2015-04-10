@@ -12,11 +12,8 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
  
-  #config.vm.box = "powerstrip-k8s-demo-v1"
-  #config.vm.box_url = "http://storage.googleapis.com/experiments-clusterhq/orchestration-demos/powerstrip-k8s-demo-v1.box"
-
-  config.vm.box = "powerstrip-k8s-demo-v1-local"
-  config.vm.box_url = "file:///Users/kai/projects/powerstrip-k8s-demo/box/powerstrip-k8s-demo-v1.box"
+  config.vm.box = "powerstrip-k8s-demo-v1"
+  config.vm.box_url = "http://storage.googleapis.com/experiments-clusterhq/orchestration-demos/powerstrip-k8s-demo-v1.box"
 
   if Vagrant.has_plugin?("vagrant-cachier")
     config.cache.scope = :box
