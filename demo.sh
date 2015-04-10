@@ -52,6 +52,7 @@ cmd-down() {
 }
 
 cmd-tidy() {
+  # kill all stopped containers that are not wait-for-weave
   sudo docker ps -a | grep Exited | grep -v "wait-for-weave" | awk '{print $1}' | xargs sudo docker rm
 }
 
