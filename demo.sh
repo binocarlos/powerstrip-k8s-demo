@@ -24,27 +24,26 @@ cmd-up() {
     mode="spinning"
   fi
   echo "running redis-master-pod - $mode"
-  cat examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod.json
+  cat /vagrant/examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod-spinning.json
   # the redis-master is a pod because then we can use the nodeSelector field
-  sudo kubectl create -f /tmp/redis-master-pod.json
+  kubectl create -f /tmp/redis-master-pod-spinning.json
   echo "running redis-master-service"
-  sudo kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
+  kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
   echo "running frontend-controller"
-  sudo kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
+  kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
   echo "running frontend-service"
-  sudo kubectl create -f /vagrant/examples/guestbook/frontend-service.json
-  cmd-ls
+  kubectl create -f /vagrant/examples/guestbook/frontend-service.json
+  sudo kubectl get pods
 }
 
 cmd-down() {
-  sudo kubectl delete rc frontend-controller
-  sudo kubectl delete rc redis-slave-controller
-  sudo kubectl get pods | awk 'NR!=1' | awk '{print $1}' | xargs sudo kubectl delete pod || true
-  sudo kubectl get services | awk 'NR!=1' | awk '{print $1}' | grep -v "kubernetes" | xargs sudo kubectl delete service || true
+  kubectl delete rc frontend-controller
+  kubectl get pods | awk 'NR!=1' | awk '{print $1}' | xargs kubectl delete pod || true
+  kubectl get services | awk 'NR!=1' | awk '{print $1}' | grep -v "kubernetes" | xargs kubectl delete service || true
   cmd-ls
-  sleep 5
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo bash /vagrant/demo.sh tidy
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node2 sudo bash /vagrant/demo.sh tidy
+  sleep 10
+  ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 bash /vagrant/demo.sh tidy
+  ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node2 bash /vagrant/demo.sh tidy
 }
 
 cmd-tidy() {
@@ -54,14 +53,15 @@ cmd-tidy() {
 
 cmd-shift() {
   local mode="ssd";
-  sudo kubectl delete pod redis-master-pod
+  echo "deleting redis-master-pod - spinning"
+  kubectl delete pod redis-master-pod
   sleep 5
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo bash /vagrant/demo.sh tidy
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node2 sudo bash /vagrant/demo.sh tidy
   # there is a template for the redis master - we change a nodeSelector to co-ordinate the DB moving servers 
-  cat examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod.json
+  cat /vagrant/examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod-ssd.json
   # the redis-master is a pod because then we can use the nodeSelector field
-  sudo kubectl create -f /tmp/redis-master-pod.json
+  kubectl create -f /tmp/redis-master-pod-ssd.json
+  echo "starting redis-master-pod - ssd"
+  sudo kubectl get pods
 }
 
 usage() {
