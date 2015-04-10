@@ -28,7 +28,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node1.vm.provider "virtualbox" do |v|
       v.memory = 1024
     end
-    config.vm.synced_folder /Users/kai/projects/powerstrip-flocker, "/srv/powerstrip-flocker"
     node1.vm.provision "shell", inline: <<SCRIPT
 mkdir -p /etc/flocker
 echo 172.16.255.251 > /etc/flocker/my_address
@@ -48,7 +47,6 @@ SCRIPT
     node2.vm.provider "virtualbox" do |v|
       v.memory = 1024
     end
-    config.vm.synced_folder /Users/kai/projects/powerstrip-flocker, "/srv/powerstrip-flocker"
     node2.vm.provision "shell", inline: <<SCRIPT
 mkdir -p /etc/flocker
 echo 172.16.255.252 > /etc/flocker/my_address
