@@ -29,10 +29,6 @@ cmd-up() {
   sudo kubectl create -f /tmp/redis-master-pod.json
   echo "running redis-master-service"
   sudo kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
-  echo "running redis-slave-controller"
-  sudo kubectl create -f /vagrant/examples/guestbook/redis-slave-controller.json
-  echo "running redis-slave-service"
-  sudo kubectl create -f /vagrant/examples/guestbook/redis-slave-service.json
   echo "running frontend-controller"
   sudo kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
   echo "running frontend-service"
