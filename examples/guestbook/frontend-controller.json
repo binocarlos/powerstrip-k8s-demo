@@ -19,7 +19,7 @@
        },
        "labels": {
          "name": "frontend",
-         "uses": "redis-slave-or-redis-master",
+         "uses": "redis-master",
          "app": "frontend"
        }
       }},
