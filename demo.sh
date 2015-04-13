@@ -24,9 +24,9 @@ cmd-up() {
     mode="spinning"
   fi
   echo "running redis-master-pod - $mode"
-  cat /vagrant/examples/guestbook/redis-master-pod-template.json | sed "s/_DISKTYPE_/$mode/" > /tmp/redis-master-pod-spinning.json
+  #cat /vagrant/examples/guestbook/redis-master-pod-template.json | sed "s/\"disktype\":\"spinning\"/\"disktype\":\"ssd\"/" > /tmp/redis-master-pod.json
   # the redis-master is a pod because then we can use the nodeSelector field
-  kubectl create -f /tmp/redis-master-pod-spinning.json
+  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.json
   echo "running redis-master-service"
   kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
   echo "running frontend-controller"

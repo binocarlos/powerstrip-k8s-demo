@@ -25,6 +25,37 @@ activate-service() {
   bash /srv/powerstrip-base-install/ubuntu/install.sh service $1
 }
 
+cmd-bridge() {
+  /opt/bin/weave create-bridge
+  ip addr add dev weave $BRIDGE_ADDRESS
+  ip route add $BREAKOUT_ADDRESS dev weave scope link
+  ip route add 224.0.0.0/4 dev weave
+}
+
+# if a vagrant halt -> vagrant up happens
+# then this step is needed to bring up all the services again
+cmd-boot() {
+  cmd-bridge
+  service docker start
+
+  local hostname=`cat /etc/flocker/hostname`
+
+  if [[ $hostname == "master" ]]; then
+    supervisorctl start flocker-control
+    service etcd start
+    service kube-controller start
+    service kube-scheduler start
+    service kube-apiserver start
+  else
+    supervisorctl start flocker-zfs-agent
+    supervisorctl start powerstrip-flocker
+    supervisorctl start powerstrip-weave
+    supervisorctl start powerstrip
+    service kubelet start
+    service kube-proxy start
+  fi
+}
+
 # here we are preparing the system for weave based k8s
 install-weave() {
   mkdir -p /opt/bin/
@@ -40,10 +71,7 @@ install-weave() {
     --output /opt/bin/weave-helper
   chmod +x /opt/bin/weave
   chmod +x /opt/bin/weave-helper
-  /opt/bin/weave create-bridge
-  ip addr add dev weave $BRIDGE_ADDRESS
-  ip route add $BREAKOUT_ADDRESS dev weave scope link
-  ip route add 224.0.0.0/4 dev weave
+  cmd-bridge
 }
 
 # basic setup such as copy this script to /srv
@@ -198,6 +226,8 @@ install.sh tcptunnel
 install.sh swarm
 install.sh weave
 install.sh debug
+install.sh bridge
+install.sh boot
 install.sh help
 EOF
   exit 1
@@ -209,6 +239,8 @@ main() {
   minion)                   shift; cmd-minion $@;;
   weave)                    shift; cmd-weave $@;;
   debug)                    shift; cmd-debug $@;;
+  bridge)                   shift; cmd-bridge $@;;
+  boot)                     shift; cmd-boot $@;;
   *)                        usage $@;;
   esac
 }
