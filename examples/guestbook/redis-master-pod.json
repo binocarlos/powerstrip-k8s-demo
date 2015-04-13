@@ -30,7 +30,7 @@
     "app": "redis"
   },
   "nodeSelector":{
-      "disktype":"_DISKTYPE_"
+      "disktype":"spinning"
   }
 }
     
