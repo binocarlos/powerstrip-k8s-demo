@@ -29,17 +29,16 @@ wait-for-redis() {
 }
 
 cmd-up() {
-  echo "running redis-master-pod - $mode"
-  #cat /vagrant/examples/guestbook/redis-master-pod-template.json | sed "s/\"disktype\":\"spinning\"/\"disktype\":\"ssd\"/" > /tmp/redis-master-pod.json
-  # the redis-master is a pod because then we can use the nodeSelector field
-  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.json
+  
   echo "running redis-master-service"
   kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
-  echo "running frontend-controller"
-  kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
   echo "running frontend-service"
   kubectl create -f /vagrant/examples/guestbook/frontend-service.json
-
+  echo "running redis-master-pod"
+  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.jsons
+  echo "running frontend-controller"
+  kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
+  
   wait-for-redis
 
   kubectl get pods
@@ -61,13 +60,18 @@ cmd-tidy() {
 }
 
 cmd-switch() {
-  kubectl delete pod redis-master
-  kubectl delete service redis-master
+  echo "delete redis-master-service"
+  kubectl delete pod redis-master-pod
+  sleep 5
+  echo "re-allocate redis-master-service"
   cat /vagrant/examples/guestbook/redis-master-pod.json | sed "s/\"disktype\":\"spinning\"/\"disktype\":\"ssd\"/" > /tmp/redis-master-pod.json
   kubectl create -f /tmp/redis-master-pod.json
-  kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
   wait-for-redis
   kubectl get pods
+}
+
+cmd-boot() {
+  bash /vagrant/install.sh boot $@
 }
 
 usage() {
@@ -84,6 +88,7 @@ EOF
 
 main() {
   case "$1" in
+  boot)                     shift; cmd-boot $@;;
   up)                       shift; cmd-up $@;;
   down)                     shift; cmd-down $@;;
   ps)                       shift; cmd-ps $@;;
