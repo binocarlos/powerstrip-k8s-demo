@@ -17,6 +17,11 @@ cmd-ps() {
   sudo kubectl get services
 }
 
+cmd-redis() {
+  local redisaddress=`sudo kubectl get services | grep "redis-master" | awk '{print $4}'`
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo docker run --entrypoint="/usr/local/bin/redis-cli" dockerfile/redis -h $redisaddress $@
+}
+
 wait-for-redis() {
   local redismode=""
 
@@ -35,7 +40,7 @@ cmd-up() {
   echo "running frontend-service"
   kubectl create -f /vagrant/examples/guestbook/frontend-service.json
   echo "running redis-master-pod"
-  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.jsons
+  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.json
   echo "running frontend-controller"
   kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
   
@@ -94,6 +99,7 @@ main() {
   ps)                       shift; cmd-ps $@;;
   tidy)                     shift; cmd-tidy $@;;
   switch)                   shift; cmd-switch $@;;
+  redis)                    shift; cmd-redis $@;;
   *)                        usage $@;;
   esac
 }
