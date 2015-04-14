@@ -146,6 +146,8 @@ cmd-master() {
 
   kubectl label --overwrite nodes democluster-node1 disktype=spinning
   kubectl label --overwrite nodes democluster-node2 disktype=ssd
+
+  cmd-config
 }
 
 # /etc/flocker/my_address
