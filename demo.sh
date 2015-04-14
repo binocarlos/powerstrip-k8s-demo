@@ -19,7 +19,8 @@ cmd-ps() {
 
 cmd-redis() {
   local redisaddress=`sudo kubectl get services | grep "redis-master" | awk '{print $4}'`
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 sudo docker run --entrypoint="/usr/local/bin/redis-cli" dockerfile/redis -h $redisaddress $@
+  local nodename=`sudo kubectl get pods | grep name=redis-master | awk '{print $5}' | sed 's/democluster-//' | sed 's/\/[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+//'`
+  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-$nodename sudo docker run --entrypoint="/usr/local/bin/redis-cli" dockerfile/redis -h $redisaddress $@
 }
 
 wait-for-redis() {
@@ -36,13 +37,13 @@ wait-for-redis() {
 cmd-up() {
   
   echo "running redis-master-service"
-  kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
+  kubectl create -f /etc/k8s-demo/redis-master-service.json
   echo "running frontend-service"
-  kubectl create -f /vagrant/examples/guestbook/frontend-service.json
+  kubectl create -f /etc/k8s-demo/frontend-service.json
   echo "running redis-master-pod"
-  kubectl create -f /vagrant/examples/guestbook/redis-master-pod.json
+  kubectl create -f /etc/k8s-demo/redis-master-pod-spinning.json
   echo "running frontend-controller"
-  kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
+  kubectl create -f /etc/k8s-demo/frontend-controller.json
   
   wait-for-redis
 
@@ -69,8 +70,7 @@ cmd-switch() {
   kubectl delete pod redis-master-pod
   sleep 5
   echo "re-allocate redis-master-service"
-  cat /vagrant/examples/guestbook/redis-master-pod.json | sed "s/\"disktype\":\"spinning\"/\"disktype\":\"ssd\"/" > /tmp/redis-master-pod.json
-  kubectl create -f /tmp/redis-master-pod.json
+  kubectl create -f /etc/k8s-demo/redis-master-pod-ssd.json
   wait-for-redis
   kubectl get pods
 }

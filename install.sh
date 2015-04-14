@@ -9,6 +9,14 @@ fi
 export BRIDGE_ADDRESS=`cat /etc/flocker/bridge_address`
 export BREAKOUT_ADDRESS=`cat /etc/flocker/breakout_address`
 
+cmd-config() {
+  mkdir -p /etc/k8s-demo
+  cat /vagrant/examples/guestbook/redis-master-pod.json > /etc/k8s-demo/redis-master-pod-spinning.json
+  cat /vagrant/examples/guestbook/redis-master-pod.json | sed "s/\"disktype\":\"spinning\"/\"disktype\":\"ssd\"/" > /etc/k8s-demo/redis-master-pod-ssd.json
+  cat /vagrant/examples/guestbook/redis-master-service.json > /etc/k8s-demo/redis-master-service.json
+  cat /vagrant/examples/guestbook/frontend-controller.json > /etc/k8s-demo/frontend-controller.json
+  cat /vagrant/examples/guestbook/frontend-service.json > /etc/k8s-demo/frontend-service.json
+}
 # a local way of writing a supervisor script
 write-service() {
   local service="$1";
@@ -241,6 +249,7 @@ main() {
   debug)                    shift; cmd-debug $@;;
   bridge)                   shift; cmd-bridge $@;;
   boot)                     shift; cmd-boot $@;;
+  config)                   shift; cmd-config $@;;
   *)                        usage $@;;
   esac
 }
