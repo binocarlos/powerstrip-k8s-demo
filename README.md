@@ -163,3 +163,25 @@ We have installed [Powerstrip](https://github.com/clusterhq/powerstrip) and [pow
 The 2 nodes are joined by the Kubernetes `master`.  This runs the various other parts of Kubernetes (`kube-controller`, `kube-scheduler`, `kube-apiserver`, `etc`).  It also runs the `flocker-control-service`.
 
 ![k8s](img/k8s.png "fig 4. k8s")
+
+## Restart cluster
+
+If you `vagrant halt` the cluster - you will need to restart the cluster using this command:
+
+```bash
+$ make boot
+```
+
+This will `vagrant up` and then run `sudo bash /vagrant/install.sh boot` which spins up all the required services.
+
+
+## /vagrant/demo.sh
+
+There is a script that can automate the steps of the demo:
+
+```bash
+$ vagrant ssh master
+master$ sudo bash /vagrant/demo.sh up
+master$ sudo bash /vagrant/demo.sh switch
+master$ sudo bash /vagrant/demo.sh down
+```
