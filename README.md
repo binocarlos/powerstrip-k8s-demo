@@ -12,7 +12,7 @@ First you need to install:
  * [vagrant](http://www.vagrantup.com/downloads.html)
 
 ## start vms
-
+<img src="/binocarlos/powerstrip-k8s-demo/raw/master/ttygif/anim.gif" alt="tty demo" title="fig 0. tty demo" style="max-width:100%;">
 To run the demo:
 
 ```bash
@@ -115,6 +115,8 @@ http://172.16.255.251:8000
 ```
 
 This will load the guestbook application - make a couple of entries clicking `Submit` after each entry.
+
+![screen shot](img/screenshot.png "fig 5. screen shot")
 
 ### migrate database
 Now it's time to tell kubernetes to move the Redis container and its data to node2 (the one with an SSD drive).
