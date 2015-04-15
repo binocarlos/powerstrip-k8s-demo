@@ -19,14 +19,92 @@ $ cd powerstrip-k8s-demo
 $ vagrant up
 ```
 
-## example
+## scenario
 
-The first step is to spin up the kubernetes cluster - this will start the redis pod on `node1` (the spinning node) and start 3 PHP pods across both nodes.
+This demo is the classic kubernetes `guestbook` app that uses PHP and Redis.
+
+The aim is to migrate the Redis container AND it's data using nothing other than Kubernetes primitives.
+
+We have labeled the 2 minions `spinning` and `ssd` to represent the types of disk they have.  The Redis server is first allocated onto the node with the spinning disk and then migrated (along with its data) onto the node with an ssd drive.
+
+This represents a real world migration where we realise that our database server needs a faster disk.
+
+#### before migration
+[img:before migration]
+
+#### after migration
+[img:after migration]
+
+## demo
+
+We have 1 `pod` for the Redis server and a `replication controller` for the PHP containers.
+
+The first step is to SSH into the master node.
 
 ```bash
 $ vagrant ssh master
-master$ sudo bash /vagrant/demo.sh up
 ```
+
+We can now use the `kubectl` command to analyze our Kubernetes cluster:
+
+```bash
+master$ sudo kubectl get nodes
+NAME                LABELS              STATUS
+democluster-node1   disktype=spinning   Ready
+democluster-node2   disktype=ssd        Ready
+```
+
+Notice how we have labelled node1 with `disktype=spinning` and node2 with `disktype=ssd`.  We will use these labels together with a `nodeSelector` for the Redis Master pod.  The `nodeSelector` is what decides which node the redis container is scheduled onto.
+
+We can also use `kubectl` to list the pods on the cluster:
+
+```bash
+master$ sudo kubectl get pods
+POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS              CREATED
+```
+
+### start services
+The first step is to spin up the 2 services.  Services are Kubernetes way of dynamically routing around the cluster - you can read more about services [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md).
+
+```bash
+master$ sudo kubectl create -f /etc/k8s-demo/redis-master-service.json
+master$ sudo kubectl create -f /etc/k8s-demo/frontend-service.json
+```
+
+We can check that those services were registered:
+
+```bash
+master$ sudo kubectl get services
+```
+
+### start redis master
+The next step is to start the redis master pod - we use the `redis-master-pod-spinning.json` file which has a nodeSelector set to `disktype=spinning`.
+
+```bash
+master$ sudo kubectl create -f /etc/k8s-demo/redis-master-pod-spinning.json
+```
+
+Once we have done this we run `sudo kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`
+
+### start PHP replication controller
+Now we start the PHP replication controller - this will start 3 PHP containers which all link to the redis-master service:
+
+```bash
+master$ sudo kubectl create -f /etc/k8s-demo/frontend-controller.json
+```
+
+Again - once we have run this - we run `sudo kubectl get pods` and wait for our PHP pods to be in the `Running` state.
+
+### confirm location of redis-master
+
+Notice how the redis-master has been allocated onto node1 (`democluster-node1`):
+
+```bash
+master$ sudo kubectl get pods | grep name=redis-master
+redis-master-pod            10.2.2.8            redis-master        dockerfile/redis                          democluster-node1/172.16.255.251   app=redis,name=redis-master                    Running             About an hour
+```
+
+### access application
 
 The next step is to load the app in your browser using the following address:
 
@@ -34,36 +112,52 @@ The next step is to load the app in your browser using the following address:
 http://172.16.255.251:8000
 ```
 
-Make a couple of entries into the guestbook.
+This will load the guestbook application - make a couple of entries clicking `Submit` after each entry.
 
-Now - we will migrate the redis server:
+### migrate database
+Now it's time to tell kubernetes to move the Redis container and its data to node2 (the one with an SSD drive).
 
-```bash
-master$ sudo bash /vagrant/demo.sh shift
-```
-
-This will have stopped the original redis server, moved the data onto the other server and then started the redis server.
-
-You can confirm the redis server has moved by using this command:
+The first step is to stop the redis-master pod:
 
 ```bash
-master$ sudo kubectl get pods
+master$ sudo kubectl delete pod redis-master-pod 
 ```
 
-Notice how the `redis-master` pod is running on `node2` (the ssd drive).
+Then we re-schedule the redis-master pod using the config file with the `disktype=ssd` nodeSelector.
 
-Now reload the app in your browser (`http://172.16.255.251:8000`) - notice how the original data you created is still there!
+```bash
+master$ sudo kubectl create -f /etc/k8s-demo/redis-master-pod-ssd.json
+```
 
-This demonstrates how we can use [kubernetes](https://github.com/googlecloudplatform/kubernetes) and [flocker](https://github.com/clusterhq/flocker) to migrate a database container AND its data.
+Once we have done this we run `sudo kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`.
 
-## overview
+Notice how the redis-master has been allocated onto node2 (`democluster-node2`):
 
-The demo is the classic kubernetes `guestbook` app that uses PHP and Redis.
+```bash
+master$ sudo kubectl get pods | grep name=redis-master
+redis-master-pod            10.2.3.9            redis-master        dockerfile/redis                          democluster-node2/172.16.255.252   app=redis,name=redis-master                    Running             About an hour
+```
 
-There is a single Redis pod and 3 PHP pods (managed by a replication controller).
+### access application
 
-We have labeled the 2 minions `spinning` and `ssd` to represent the types of disk they have.
+Now, load the app in your browser using same address:
 
-The idea is that we target the redis server onto the `spinning` node to start with.  We then create some data on that node.  Finally, we migrate the redis container and the data we created to the `ssd` node.
+```
+http://172.16.255.251:8000
+```
 
-This represents a real world migration where we realise that our database server needs a faster disk.
+It should have loaded the entries you made originally - this means that Flocker has migrated the data onto another server!
+
+## how it works
+
+The key part of this demonstration is the usage of [Flocker](https://github.com/clusterhq/flocker) to migrate data from one server to another.  Also, that we triggered the migration using standard orchestration tools which are speaking to [Powerstrip](https://github.com/clusterhq/powerstrip) and [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker).
+
+### powerstrip setup
+We have installed [Powerstrip](https://github.com/clusterhq/powerstrip) and [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker) on each host.  This means that when Kubernetes starts a container with volumes - [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker) is able prepare / migrate the required data volumes before hand.
+
+[img:docker server]
+
+### Kubernetes Cluster
+The 2 nodes are joined by the Kubernetes `master`.  This runs the various other parts of Kubernetes (`kube-controller`, `kube-scheduler`, `kube-apiserver`, `etc`).  It also runs the `flocker-control-service`.
+
+[img:k8s cluster]
