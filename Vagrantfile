@@ -23,7 +23,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node1.vm.network :private_network, :ip => "172.16.255.251"
     node1.vm.hostname = "node1"
     node1.vm.provider "virtualbox" do |v|
-      v.memory = 1024
+      v.memory = 1536
     end
     node1.vm.provision "shell", inline: <<SCRIPT
 mkdir -p /etc/flocker
@@ -42,7 +42,7 @@ SCRIPT
     node2.vm.network :private_network, :ip => "172.16.255.252"
     node2.vm.hostname = "node2"
     node2.vm.provider "virtualbox" do |v|
-      v.memory = 1024
+      v.memory = 1536
     end
     node2.vm.provision "shell", inline: <<SCRIPT
 mkdir -p /etc/flocker
@@ -62,7 +62,7 @@ SCRIPT
     master.vm.network :private_network, :ip => "172.16.255.250"
     master.vm.hostname = "master"
     master.vm.provider "virtualbox" do |v|
-      v.memory = 1024
+      v.memory = 1536
     end
     master.vm.provision "shell", inline: <<SCRIPT
 mkdir -p /etc/flocker
