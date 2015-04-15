@@ -66,11 +66,16 @@ cmd-tidy() {
 }
 
 cmd-switch() {
-  echo "delete redis-master-service"
+  local messages=`cmd-redis get messages`
+  local node="ssd"
+  if [[ -n "$1" ]]; then
+    node=$1
+  fi
+  echo "delete redis-master-pod"
   kubectl delete pod redis-master-pod
   sleep 5
-  echo "re-allocate redis-master-service"
-  kubectl create -f /etc/k8s-demo/redis-master-pod-ssd.json
+  echo "re-allocate redis-master-pod"
+  kubectl create -f /etc/k8s-demo/redis-master-pod-$node.json
   wait-for-redis
   kubectl get pods
 }
