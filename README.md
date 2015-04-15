@@ -12,7 +12,7 @@ First you need to install:
  * [vagrant](http://www.vagrantup.com/downloads.html)
 
 ## start vms
-<img src="/binocarlos/powerstrip-k8s-demo/raw/master/ttygif/anim.gif" alt="tty demo" title="fig 0. tty demo" style="max-width:100%;">
+
 To run the demo:
 
 ```bash
