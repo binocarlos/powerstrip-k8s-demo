@@ -17,10 +17,12 @@ cmd-ps() {
   sudo kubectl get services
 }
 
-cmd-redis() {
-  local redisaddress=`sudo kubectl get services | grep "redis-master" | awk '{print $4}'`
-  local nodename=`sudo kubectl get pods | grep name=redis-master | awk '{print $5}' | sed 's/democluster-//' | sed 's/\/[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+//'`
-  sudo ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-$nodename sudo docker run --entrypoint="/usr/local/bin/redis-cli" dockerfile/redis -h $redisaddress $@
+cmd-get() {
+  curl -sS -L "http://172.16.255.251:8000/index.php?cmd=get&key=messages" | sed 's/^{"data": "//' | sed 's/"}$//'
+}
+
+cmd-set() {
+  curl -sS -L "http://172.16.255.251:8000/index.php?cmd=set&key=messages&value=$@"
 }
 
 wait-for-redis() {
@@ -104,7 +106,8 @@ main() {
   ps)                       shift; cmd-ps $@;;
   tidy)                     shift; cmd-tidy $@;;
   switch)                   shift; cmd-switch $@;;
-  redis)                    shift; cmd-redis $@;;
+  get)                      shift; cmd-get $@;;
+  set)                      shift; cmd-set $@;;
   *)                        usage $@;;
   esac
 }
