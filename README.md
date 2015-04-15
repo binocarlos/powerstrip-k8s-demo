@@ -2,6 +2,9 @@
 
 A demo of [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker) and [kubernetes](https://github.com/googlecloudplatform/kubernetes) migrating a database with it's data.  The data migration is powered by [flocker](https://github.com/clusterhq/flocker) and the networking is powered by [weave](https://github.com/zettio/weave) 
 
+ttygif/anim.gif
+![tty demo](ttygif/anim.gif "fig 0. tty demo")
+
 ## install
 
 First you need to install:
