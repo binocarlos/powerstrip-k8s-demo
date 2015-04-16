@@ -53,9 +53,14 @@ cmd-up() {
 }
 
 cmd-down() {
-  kubectl delete rc frontend-controller
-  kubectl get pods | awk 'NR!=1' | awk '{print $1}' | xargs kubectl delete pod || true
-  kubectl get services | awk 'NR!=1' | awk '{print $1}' | grep -v "kubernetes" | xargs kubectl delete service || true
+  kubectl delete rc -l name=frontend
+  kubectl delete pod -l name=frontend
+  kubectl delete service -l name=frontend
+
+  kubectl delete rc -l name=redis-master
+  kubectl delete pod -l name=redis-master
+  kubectl delete service -l name=redis-master
+
   cmd-ps
   sleep 10
   ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 bash /vagrant/demo.sh tidy
@@ -74,7 +79,7 @@ cmd-switch() {
     node=$1
   fi
   echo "delete redis-master-pod"
-  kubectl delete pod redis-master-pod
+  kubectl delete pod -l name=redis-master
   sleep 5
   echo "re-allocate redis-master-pod"
   kubectl create -f /etc/k8s-demo/redis-master-pod-$node.json
