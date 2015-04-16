@@ -71,7 +71,7 @@ update_services_config() {
 
     # update kube-apiserver config
     echo "KUBE_APISERVER=$KUBERNETES_EXECUTABLE_LOCATION/kube-apiserver" | sudo tee -a  /etc/default/kube-apiserver
-    echo -e "KUBE_APISERVER_OPTS=\"--address=0.0.0.0 --port=8080 --etcd_servers=http://localhost:4001 --portal_net=10.1.0.0/16 --allow_privileged=true --kubelet_port=10250 --v=0 \"" | sudo tee -a /etc/default/kube-apiserver
+    echo -e "KUBE_APISERVER_OPTS=\"--address=0.0.0.0 --runtime_config=api/v1beta3 --port=8080 --etcd_servers=http://localhost:4001 --portal_net=10.1.0.0/16 --allow_privileged=true --kubelet_port=10250 --v=0 \"" | sudo tee -a /etc/default/kube-apiserver
     echo 'kube-apiserver config updated successfully'
 
     # update kube-controller manager config
