@@ -1,14 +1,20 @@
 {
-  "id": "frontend",
-  "kind": "Service",
-  "apiVersion": "v1beta1",
-  "port": 8000,
-  "containerPort": "http-server",
-  "publicIPs": ["172.16.255.251", "172.16.255.252"],
-  "selector": {
-    "name": "frontend"
-  },
-  "labels": {
-    "name": "frontend"
-  }
+   "kind":"Service",
+   "apiVersion":"v1beta3",
+   "metadata":{
+      "name":"frontend",
+      "labels":{
+         "name":"frontend"
+      }
+   },
+   "spec":{
+      "port":80,
+      "containerPort":80,
+      "protocol":"TCP",
+      "publicIPs": ["172.16.255.251", "172.16.255.252"],
+      "selector":{
+         "name":"frontend"
+      }
+   }
 }
+

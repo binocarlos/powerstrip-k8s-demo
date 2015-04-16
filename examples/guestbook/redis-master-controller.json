@@ -35,10 +35,8 @@
             ],
             "volumes":[{
               "name": "flocker",
-              "source":{
-                "hostDir":{
-                  "path":"/flocker/redis1"
-                }
+              "hostPath":{
+                "path":"/flocker/redisdata1"
               }
             }],
             "nodeSelector":{

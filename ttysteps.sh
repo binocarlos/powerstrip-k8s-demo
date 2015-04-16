@@ -27,6 +27,9 @@ curl -sS -L "http://172.16.255.251:8000/index.php?cmd=get&key=messages"
 curl -sS -L "http://172.16.255.251:8000/index.php?cmd=set&key=messages&value=node1,apples"
 # now we want to migrate the Redis container from node1 to node2
 # first, we stop the container
+kubectl get rc redis-master -o yaml | sed 's/spinning/ssd/' | kubectl update -f -
+kubectl delete pod -l name=redis-master
+
 sudo kubectl delete pod redis-master-pod
 # next, we schedule the redis container onto node2 (the ssd drive node)
 sudo kubectl create -f /etc/k8s-demo/redis-master-pod-ssd.json
