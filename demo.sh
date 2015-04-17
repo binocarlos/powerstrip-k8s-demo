@@ -8,13 +8,13 @@ fi
 
 cmd-ps() {
   echo "listing nodes"
-  sudo kubectl get nodes
+  kubectl get nodes
   echo "listing pods"
-  sudo kubectl get pods
+  kubectl get pods
   echo "listing rcs"
-  sudo kubectl get rc
+  kubectl get rc
   echo "listing services"
-  sudo kubectl get services
+  kubectl get services
 }
 
 cmd-get() {
