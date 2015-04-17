@@ -22,7 +22,7 @@ First you need to install:
 
 *We’ll use [Vagrant](http://www.vagrantup.com/downloads.html) to simulate our application stack locally. You could also run this demo on AWS or Rackspace with minimal modifications.*
 
-## Start VMSs
+## Start VMs
 
 To run the demo:
 
