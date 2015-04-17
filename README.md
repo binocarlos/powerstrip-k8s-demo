@@ -3,13 +3,13 @@
 ![warning](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/error.png "warning")
 **Please note:** *because this demo uses Powerstrip, which is only meant for prototyping Docker extensions, we do not recommend this configuration for anything approaching production usage. When Docker extensions become official, Flocker will support them. Until then, this is just a proof-of-concept.*
 
-We [recently showed](https://clusterhq.com/blog/migration-database-container-docker-swarm/) how you could use [Docker Swarm](https://github.com/docker/swarm) to migrate a database container and its volume between hosts using only the native [Docker Swarm](https://github.com/docker/swarm) CLI. Today we are going to show you how to do the same thing using only [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
-
 ![tty demo](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/ttygif/anim.gif "fig 0. tty demo")
 
-[Kubernetes](https://github.com/googlecloudplatform/kubernetes) is great at orchestrating containers and [Flocker](https://github.com/clusterhq/flocker) is great at managing data volumes attached to containers and migrating the data between physical hosts.
+We [recently showed](https://clusterhq.com/blog/migration-database-container-docker-swarm/) how you could use [Docker Swarm](https://github.com/docker/swarm) to migrate a database container and its volume between hosts using only the native [Docker Swarm](https://github.com/docker/swarm) CLI. Today we are going to show you how to do the same thing using only [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
 
-Ideally - we want to use both systems in harmony so we can orchestrate AND migrate containers.  That is the aim of this demo, to show how using [Powerstrip](https://github.com/clusterhq/powerstrip), we can extend Docker and still use orchestration tools like [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
+[Kubernetes](https://github.com/googlecloudplatform/kubernetes) is great at orchestrating containers and [Flocker](https://github.com/clusterhq/flocker) is great at managing data volumes attached to containers.
+
+Ideally - we want to use both systems together so we can orchestrate AND migrate containers.  That is the aim of this demo, to show how using [Powerstrip](https://github.com/clusterhq/powerstrip), we can extend Docker with tools like [Flocker](https://github.com/clusterhq/flocker) and still use orchestration tools like [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
 
 ## Install
 
@@ -18,11 +18,9 @@ First you need to install:
  * [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
  * [Vagrant](http://www.vagrantup.com/downloads.html)
 
-#### Virtualbox
-We’ll use [Virtualbox](https://www.virtualbox.org/wiki/Downloads) to supply the virtual machines that our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster will run on.
+**We’ll use [Virtualbox](https://www.virtualbox.org/wiki/Downloads) to supply the virtual machines that our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster will run on.**
 
-#### Vagrant
-We’ll use [Vagrant](http://www.vagrantup.com/downloads.html) to simulate our application stack locally. You could also run this demo on AWS or Rackspace with minimal modifications.
+**We’ll use [Vagrant](http://www.vagrantup.com/downloads.html) to simulate our application stack locally. You could also run this demo on AWS or Rackspace with minimal modifications.**
 
 ## Start VMSs
 
@@ -46,11 +44,13 @@ This represents a real world migration where we realise that our database server
 
 #### Before migration
 ![before migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/before.png "fig 1. before migration")
-*fig 1. multiple PHP containers accessing Redis container on node 1*
+
+#####*fig 1. multiple PHP containers accessing Redis container on node 1*
 
 #### After migration
 ![after migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/after.png "fig 2. after migration")
-*fig 2. Redis container & data volume migrated to node 2*
+
+#####*fig 2. Redis container & data volume migrated to node 2*
 
 ## Demo
 
