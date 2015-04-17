@@ -21,12 +21,14 @@
          "spec":{
             "containers":[
                {
-                  "name": "redis-master",
-                  "image": "dockerfile/redis",
-                  "ports": [{
-                     "containerPort": 6379,
-                     "protocol":"TCP"
-                  }],
+                  "name":"master",
+                  "image":"dockerfile/redis",
+                  "ports":[
+                     {
+                        "containerPort":6379,
+                        "protocol":"TCP"
+                     }
+                  ],
                   "volumeMounts": [{
                     "name": "flocker",
                     "mountPath": "/data"
