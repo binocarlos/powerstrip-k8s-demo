@@ -50,7 +50,7 @@ $ vagrant ssh master
 We can now use the `kubectl` command to analyze our Kubernetes cluster:
 
 ```bash
-master$ sudo kubectl get nodes
+master$ kubectl get nodes
 NAME                LABELS              STATUS
 democluster-node1   disktype=spinning   Ready
 democluster-node2   disktype=ssd        Ready
@@ -61,7 +61,7 @@ Notice how we have labelled node1 with `disktype=spinning` and node2 with `diskt
 We can also use `kubectl` to list the pods on the cluster:
 
 ```bash
-master$ sudo kubectl get pods
+master$ kubectl get pods
 POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS              CREATED
 ```
 
@@ -69,40 +69,40 @@ POD                 IP                  CONTAINER(S)        IMAGE(S)            
 The first step is to spin up the 2 services.  Services are Kubernetes way of dynamically routing around the cluster - you can read more about services [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md).
 
 ```bash
-master$ sudo kubectl create -f /etc/k8s-demo/redis-master-service.json
-master$ sudo kubectl create -f /etc/k8s-demo/frontend-service.json
+master$ kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
+master$ kubectl create -f /vagrant/examples/guestbook/frontend-service.json
 ```
 
 We can check that those services were registered:
 
 ```bash
-master$ sudo kubectl get services
+master$ kubectl get services
 ```
 
 ### start redis master
 The next step is to start the redis master pod - we use the `redis-master-pod-spinning.json` file which has a nodeSelector set to `disktype=spinning`.
 
 ```bash
-master$ sudo kubectl create -f /etc/k8s-demo/redis-master-pod-spinning.json
+master$ kubectl create -f /vagrant/examples/guestbook/redis-master-controller.json
 ```
 
-Once we have done this we run `sudo kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`
+Once we have done this we run `kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`
 
 ### start PHP replication controller
 Now we start the PHP replication controller - this will start 3 PHP containers which all link to the redis-master service:
 
 ```bash
-master$ sudo kubectl create -f /etc/k8s-demo/frontend-controller.json
+master$ kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
 ```
 
-Again - once we have run this - we run `sudo kubectl get pods` and wait for our PHP pods to be in the `Running` state.
+Again - once we have run this - we run `kubectl get pods` and wait for our PHP pods to be in the `Running` state.
 
 ### confirm location of redis-master
 
 Notice how the redis-master has been allocated onto node1 (`democluster-node1`):
 
 ```bash
-master$ sudo kubectl get pods | grep name=redis-master
+master$ kubectl get pods | grep name=redis-master
 redis-master-pod            10.2.2.8            redis-master        dockerfile/redis                          democluster-node1/172.16.255.251   app=redis,name=redis-master                    Running             About an hour
 ```
 
@@ -124,21 +124,21 @@ Now it's time to tell kubernetes to move the Redis container and its data to nod
 The first step is to stop the redis-master pod:
 
 ```bash
-master$ sudo kubectl delete pod redis-master-pod
+master$ kubectl delete pod redis-master-pod
 ```
 
 Then we re-schedule the redis-master pod using the config file with the `disktype=ssd` nodeSelector.
 
 ```bash
-master$ sudo kubectl create -f /etc/k8s-demo/redis-master-pod-ssd.json
+master$ kubectl create -f /vagrant/examples/guestbook/redis-master-pod-ssd.json
 ```
 
-Once we have done this we run `sudo kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`.
+Once we have done this we run `kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`.
 
 Notice how the redis-master has been allocated onto node2 (`democluster-node2`):
 
 ```bash
-master$ sudo kubectl get pods | grep name=redis-master
+master$ kubectl get pods | grep name=redis-master
 redis-master-pod            10.2.3.9            redis-master        dockerfile/redis                          democluster-node2/172.16.255.252   app=redis,name=redis-master                    Running             About an hour
 ```
 
