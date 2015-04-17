@@ -76,7 +76,7 @@ update_services_config() {
 
     # update kube-controller manager config
     echo "KUBE_CONTROLLER_MANAGER=$KUBERNETES_EXECUTABLE_LOCATION/kube-controller-manager" | sudo tee -a  /etc/default/kube-controller-manager
-    echo -e "KUBE_CONTROLLER_MANAGER_OPTS=\"--address=0.0.0.0 --master=127.0.0.1:8080 --machines=$KUBERNETES_SLAVE1_HOSTNAME,$KUBERNETES_SLAVE2_HOSTNAME --v=0 \"" | sudo tee -a /etc/default/kube-controller-manager
+    echo -e "KUBE_CONTROLLER_MANAGER_OPTS=\"--address=0.0.0.0 --api_version=v1beta3 --master=127.0.0.1:8080 --machines=$KUBERNETES_SLAVE1_HOSTNAME,$KUBERNETES_SLAVE2_HOSTNAME --v=0 \"" | sudo tee -a /etc/default/kube-controller-manager
     echo "kube-controller-manager config updated successfully"
 
 
