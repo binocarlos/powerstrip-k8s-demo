@@ -11,27 +11,6 @@ We [recently showed](https://clusterhq.com/blog/migration-database-container-doc
 
 Ideally - we want to use both systems together so we can orchestrate AND migrate containers.  That is the aim of this demo, to show how using [Powerstrip](https://github.com/clusterhq/powerstrip), we can extend Docker with tools like [Flocker](https://github.com/clusterhq/flocker) and still use orchestration tools like [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
 
-## Install
-
-First you need to install:
-
- * [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
- * [Vagrant](http://www.vagrantup.com/downloads.html)
-
-*We’ll use [Virtualbox](https://www.virtualbox.org/wiki/Downloads) to supply the virtual machines that our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster will run on.*
-
-*We’ll use [Vagrant](http://www.vagrantup.com/downloads.html) to simulate our application stack locally. You could also run this demo on AWS or Rackspace with minimal modifications.*
-
-## Start VMs
-
-To run the demo:
-
-```bash
-$ git clone https://github.com/binocarlos/powerstrip-k8s-demo
-$ cd powerstrip-k8s-demo
-$ vagrant up
-```
-
 ## Scenario
 
 This demo is the classic kubernetes `guestbook` app that uses PHP and Redis.
@@ -50,11 +29,32 @@ This represents a real world migration where we realise that our database server
 ![after migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/after.png "fig 2. after migration")
 ###### *fig 2. Redis container & data volume migrated to node 2*
 
+## Install
+
+First you need to install:
+
+ * [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
+ * [Vagrant](http://www.vagrantup.com/downloads.html)
+
+*We’ll use [Virtualbox](https://www.virtualbox.org/wiki/Downloads) to supply the virtual machines that our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster will run on.*
+
+*We’ll use [Vagrant](http://www.vagrantup.com/downloads.html) to simulate our application stack locally. You could also run this demo on AWS or Rackspace with minimal modifications.*
+
 ## Demo
 
-We have 1 `pod` for the Redis server and a `replication controller` for the PHP containers.
+### Step 1: Start VMs
 
-The first step is to SSH into the master node.
+The first step is to clone this repo and start the 3 VMs.
+
+```bash
+$ git clone https://github.com/binocarlos/powerstrip-k8s-demo
+$ cd powerstrip-k8s-demo
+$ vagrant up
+```
+
+### Step 2: SSH to master
+
+The next step is to SSH into the master node.
 
 ```bash
 $ vagrant ssh master
@@ -71,14 +71,7 @@ democluster-node2   disktype=ssd        Ready
 
 Notice how we have labelled node1 with `disktype=spinning` and node2 with `disktype=ssd`.  We will use these labels together with a `nodeSelector` for the Redis Master pod.  The `nodeSelector` is what decides which node the redis container is scheduled onto.
 
-We can also use `kubectl` to list the pods on the cluster:
-
-```bash
-master$ kubectl get pods
-POD                 IP                  CONTAINER(S)        IMAGE(S)            HOST                LABELS              STATUS              CREATED
-```
-
-### Step 1: Start services
+### Step 3: Start services
 The first step is to spin up the 2 services.  Services are Kubernetes way of dynamically routing around the cluster - you can read more about services [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md).
 
 ```bash
@@ -92,8 +85,8 @@ We can check that those services were registered:
 master$ kubectl get services
 ```
 
-### Step 2: Start redis master
-The next step is to start the redis master pod - we use the `redis-master-pod-spinning.json` file which has a nodeSelector set to `disktype=spinning`.
+### Step 4: Start redis master
+The next step is to start the redis master - we use a replication controller which has a nodeSelector set to `disktype=spinning`.
 
 ```bash
 master$ kubectl create -f /vagrant/examples/guestbook/redis-master-controller.json
@@ -101,16 +94,16 @@ master$ kubectl create -f /vagrant/examples/guestbook/redis-master-controller.js
 
 Once we have done this we run `kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`
 
-### Step 3: Start PHP replication controller
+### Step 5: Start PHP replication controller
 Now we start the PHP replication controller - this will start 3 PHP containers which all link to the redis-master service:
 
 ```bash
 master$ kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
 ```
 
-Again - once we have run this - we run `kubectl get pods` and wait for our PHP pods to be in the `Running` state.
+Once we have run this - we run `kubectl get pods` and wait for our PHP pods to be in the `Running` state.
 
-### Step 4: Confirm location of redis-master
+### Step 6: Confirm location of redis-master
 
 Notice how the redis-master has been allocated onto node1 (`democluster-node1`):
 
@@ -119,7 +112,7 @@ master$ kubectl get pods | grep name=redis-master
 redis-master-pod            10.2.2.8            redis-master        dockerfile/redis                          democluster-node1/172.16.255.251   app=redis,name=redis-master                    Running             About an hour
 ```
 
-### Step 5: Access application
+### Step 7: Access application
 
 The next step is to load the app in your browser using the following address:
 
@@ -132,16 +125,16 @@ This will load the guestbook application - make a couple of entries clicking `Su
 ![screen shot](img/screenshot.png "fig 3. screen shot")
 ###### *fig 3. screenshot of the guestbook app*
 
-### Step 6: Migrate database
-Now it's time to tell kubernetes to move the Redis container and its data to node2 (the one with an SSD drive).
+### Step 8: Migrate database
+Now it's time to tell kubernetes to move the Redis container and its data onto node2 (the one with an SSD drive).
 
-To do this we change the `nodeSelector` for the pod template (from spinning to ssd):
+To do this we change the `nodeSelector` for the pod template in the replication controller (from spinning to ssd):
 
 ```bash
 master$ kubectl get rc redis-master -o yaml | sed 's/spinning/ssd/' | kubectl update -f -
 ```
 
-Then - we delete the redis-master pod.  The replication controller will spin up another redis-master but use the modified nodeSelector which means it will end up on node2 (with the ssd drive).
+Then, we delete the redis-master pod.  The replication controller will spin up another redis-master and use the modified nodeSelector which means it will end up on node2 (with the ssd drive).
 
 ```bash
 master$ kubectl delete pod -l name=redis-master
@@ -156,7 +149,7 @@ master$ kubectl get pods | grep name=redis-master
 redis-master-pod            10.2.3.9            redis-master        dockerfile/redis                          democluster-node2/172.16.255.252   app=redis,name=redis-master                    Running             About an hour
 ```
 
-### Step 7: Access application
+### Step 9: Access application
 
 Now, load the app in your browser using same address:
 
