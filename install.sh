@@ -122,6 +122,8 @@ cmd-master() {
   bash /vagrant/kube-install.sh master
   sleep 5
 
+  chmod a+rx /usr/bin/kubectl
+
   # wait for the nodes to be up and then label them
   local node1=`sudo kubectl get nodes | grep democluster-node1`
   local node2=`sudo kubectl get nodes | grep democluster-node2`
