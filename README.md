@@ -44,8 +44,7 @@ This represents a real world migration where we realise that our database server
 
 #### Before migration
 ![before migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/before.png "fig 1. before migration")
-
-#####*fig 1. multiple PHP containers accessing Redis container on node 1*
+######*fig 1. multiple PHP containers accessing Redis container on node 1*
 
 #### After migration
 ![after migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/after.png "fig 2. after migration")
