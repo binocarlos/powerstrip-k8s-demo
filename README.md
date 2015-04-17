@@ -32,10 +32,10 @@ We have labeled the 2 minions `spinning` and `ssd` to represent the types of dis
 This represents a real world migration where we realise that our database server needs a faster disk.
 
 #### before migration
-![before migration](img/node1.png "fig 1. before migration")
+![before migration](img/before.png "fig 1. before migration")
 
 #### after migration
-![after migration](img/node2.png "fig 2. after migration")
+![after migration](img/after.png "fig 2. after migration")
 
 ## demo
 
@@ -159,12 +159,10 @@ The key part of this demonstration is the usage of [Flocker](https://github.com/
 ### powerstrip setup
 We have installed [Powerstrip](https://github.com/clusterhq/powerstrip) and [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker) on each host.  This means that when Kubernetes starts a container with volumes - [powerstrip-flocker](https://github.com/clusterhq/powerstrip-flocker) is able prepare / migrate the required data volumes before hand.
 
-![powerstrip](img/docker.png "fig 3. powerstrip")
-
 ### Kubernetes Cluster
 The 2 nodes are joined by the Kubernetes `master`.  This runs the various other parts of Kubernetes (`kube-controller`, `kube-scheduler`, `kube-apiserver`, `etc`).  It also runs the `flocker-control-service`.
 
-![k8s](img/k8s.png "fig 4. k8s")
+![k8s](img/overview.png "fig 4. k8s")
 
 ## Restart cluster
 
