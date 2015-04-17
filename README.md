@@ -48,7 +48,7 @@ This represents a real world migration where we realise that our database server
 
 #### After migration
 ![after migration](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/after.png "fig 2. after migration")
-###### fig 2. Redis container & data volume migrated to node 2
+###### *fig 2. Redis container & data volume migrated to node 2*
 
 ## Demo
 
@@ -130,7 +130,7 @@ http://172.16.255.251:8000
 This will load the guestbook application - make a couple of entries clicking `Submit` after each entry.
 
 ![screen shot](img/screenshot.png "fig 3. screen shot")
-###### fig 3. screenshot of the guestbook app
+###### *fig 3. screenshot of the guestbook app*
 
 ### Step 6: Migrate database
 Now it's time to tell kubernetes to move the Redis container and its data to node2 (the one with an SSD drive).
@@ -180,7 +180,7 @@ We have installed [Powerstrip](https://github.com/clusterhq/powerstrip) and [pow
 The 2 nodes are joined by the Kubernetes `master`.  This runs the various other parts of Kubernetes (`kube-controller`, `kube-scheduler`, `kube-apiserver`, `etc`).  It also runs the `flocker-control-service`.
 
 ![k8s](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/overview.png "fig 3. k8s")
-###### fig 4. overview of the Kubernetes cluster
+###### *fig 4. overview of the Kubernetes cluster*
 
 ## Conclusion
 Kubernetes is a powerful orchestration tool and we have shown that you can extend it's default behaviour using [Powerstrip](https://github.com/clusterhq/powerstrip) adapters (and soon official Docker extensions).
