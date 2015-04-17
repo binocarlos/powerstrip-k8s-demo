@@ -8,13 +8,13 @@ fi
 
 cmd-ps() {
   echo "listing nodes"
-  sudo kubectl get nodes
+  kubectl get nodes
   echo "listing pods"
-  sudo kubectl get pods
+  kubectl get pods
   echo "listing rcs"
-  sudo kubectl get rc
+  kubectl get rc
   echo "listing services"
-  sudo kubectl get services
+  kubectl get services
 }
 
 cmd-get() {
@@ -37,25 +37,27 @@ wait-for-redis() {
 }
 
 cmd-up() {
-  
   echo "running redis-master-service"
-  kubectl create -f /etc/k8s-demo/redis-master-service.json
+  kubectl create -f /vagrant/examples/guestbook/redis-master-service.json
   echo "running frontend-service"
-  kubectl create -f /etc/k8s-demo/frontend-service.json
+  kubectl create -f /vagrant/examples/guestbook/frontend-service.json
   echo "running redis-master-pod"
-  kubectl create -f /etc/k8s-demo/redis-master-pod-spinning.json
+  kubectl create -f /vagrant/examples/guestbook/redis-master-controller.json
   echo "running frontend-controller"
-  kubectl create -f /etc/k8s-demo/frontend-controller.json
-  
-  wait-for-redis
-
+  kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
+  sleep 10
   kubectl get pods
 }
 
 cmd-down() {
-  kubectl delete rc frontend-controller
-  kubectl get pods | awk 'NR!=1' | awk '{print $1}' | xargs kubectl delete pod || true
-  kubectl get services | awk 'NR!=1' | awk '{print $1}' | grep -v "kubernetes" | xargs kubectl delete service || true
+  kubectl delete rc -l name=frontend
+  kubectl delete pod -l name=frontend
+  kubectl delete service -l name=frontend
+
+  kubectl delete rc -l name=redis-master
+  kubectl delete pod -l name=redis-master
+  kubectl delete service -l name=redis-master
+
   cmd-ps
   sleep 10
   ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa root@democluster-node1 bash /vagrant/demo.sh tidy
@@ -68,17 +70,9 @@ cmd-tidy() {
 }
 
 cmd-switch() {
-  local messages=`cmd-redis get messages`
-  local node="ssd"
-  if [[ -n "$1" ]]; then
-    node=$1
-  fi
-  echo "delete redis-master-pod"
-  kubectl delete pod redis-master-pod
-  sleep 5
-  echo "re-allocate redis-master-pod"
-  kubectl create -f /etc/k8s-demo/redis-master-pod-$node.json
-  wait-for-redis
+  kubectl get rc redis-master -o yaml | sed 's/spinning/ssd/' | kubectl update -f -
+  kubectl delete pod -l name=redis-master
+  sleep 10
   kubectl get pods
 }
 

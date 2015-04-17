@@ -71,12 +71,12 @@ update_services_config() {
 
     # update kube-apiserver config
     echo "KUBE_APISERVER=$KUBERNETES_EXECUTABLE_LOCATION/kube-apiserver" | sudo tee -a  /etc/default/kube-apiserver
-    echo -e "KUBE_APISERVER_OPTS=\"--address=0.0.0.0 --port=8080 --etcd_servers=http://localhost:4001 --portal_net=10.1.0.0/16 --allow_privileged=true --kubelet_port=10250 --v=0 \"" | sudo tee -a /etc/default/kube-apiserver
+    echo -e "KUBE_APISERVER_OPTS=\"--address=0.0.0.0 --port=8080 --runtime_config=api/v1beta3 --etcd_servers=http://localhost:4001 --portal_net=10.1.0.0/16 --allow_privileged=true --kubelet_port=10250 --v=0 \"" | sudo tee -a /etc/default/kube-apiserver
     echo 'kube-apiserver config updated successfully'
 
     # update kube-controller manager config
     echo "KUBE_CONTROLLER_MANAGER=$KUBERNETES_EXECUTABLE_LOCATION/kube-controller-manager" | sudo tee -a  /etc/default/kube-controller-manager
-    echo -e "KUBE_CONTROLLER_MANAGER_OPTS=\"--address=0.0.0.0 --master=127.0.0.1:8080 --machines=$KUBERNETES_SLAVE1_HOSTNAME,$KUBERNETES_SLAVE2_HOSTNAME --v=0 \"" | sudo tee -a /etc/default/kube-controller-manager
+    echo -e "KUBE_CONTROLLER_MANAGER_OPTS=\"--address=0.0.0.0 --api_version=v1beta3 --master=127.0.0.1:8080 --machines=$KUBERNETES_SLAVE1_HOSTNAME,$KUBERNETES_SLAVE2_HOSTNAME --v=0 \"" | sudo tee -a /etc/default/kube-controller-manager
     echo "kube-controller-manager config updated successfully"
 
 
