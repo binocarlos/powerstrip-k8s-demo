@@ -62,15 +62,9 @@ install-weave() {
   curl \
     --silent \
     --location \
-    https://github.com/zettio/weave/releases/download/latest_release/weave \
+    https://github.com/weaveworks/weave/releases/download/v0.9.0/weave \
     --output /opt/bin/weave
-  curl \
-    --silent \
-    --location \
-    https://raw.github.com/errordeveloper/weave-demos/master/poseidon/weave-helper \
-    --output /opt/bin/weave-helper
   chmod +x /opt/bin/weave
-  chmod +x /opt/bin/weave-helper
   cmd-bridge
 }
 
