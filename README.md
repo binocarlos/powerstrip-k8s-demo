@@ -1,7 +1,7 @@
 ## Powerstrip-k8s-demo
 
 ![warning](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/error.png "warning")
-**Please note:** *because this demo uses Powerstrip, which is only meant for prototyping Docker extensions, we do not recommend this configuration for anything approaching production usage. When Docker extensions become official, Flocker will support them. Until then, this is just a proof-of-concept.*
+**Please note:** *because this demo uses [Powerstrip](https://github.com/clusterhq/powerstrip), which is only meant for prototyping Docker extensions, we do not recommend this configuration for anything approaching production usage. When Docker extensions become official, [Flocker](https://github.com/clusterhq/flocker) will support them. Until then, this is just a proof-of-concept.*
 
 ![tty demo](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/ttygif/anim.gif "fig 0. tty demo")
 
@@ -10,6 +10,8 @@ We [recently showed](https://clusterhq.com/blog/migration-database-container-doc
 [Kubernetes](https://github.com/googlecloudplatform/kubernetes) is great at orchestrating containers and [Flocker](https://github.com/clusterhq/flocker) is great at managing data volumes attached to containers.
 
 Ideally - we want to use both systems together so we can orchestrate AND migrate containers.  That is the aim of this demo, to show how using [Powerstrip](https://github.com/clusterhq/powerstrip), we can extend Docker with tools like [Flocker](https://github.com/clusterhq/flocker) and still use orchestration tools like [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
+
+We also need to network our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster - an ideal tool for this is [Weave](https://github.com/zettio/weave) which allows us to allocate an IP address per container.  In this example, we have fully integrated the [Weave](https://github.com/zettio/weave) network into [Kubernetes](https://github.com/googlecloudplatform/kubernetes) so each container is allocated an IP address from the weave bridge.
 
 ## Scenario
 
