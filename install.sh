@@ -59,11 +59,12 @@ cmd-boot() {
 # here we are preparing the system for weave based k8s
 install-weave() {
   mkdir -p /opt/bin/
-  curl \
-    --silent \
-    --location \
-    https://github.com/weaveworks/weave/releases/download/v0.9.0/weave \
-    --output /opt/bin/weave
+  #curl \
+  #  --silent \
+  #  --location \
+  #  https://github.com/weaveworks/weave/releases/download/v0.9.0/weave \
+  #  --output /opt/bin/weave
+  cp /vagrant/weave /opt/bin/weave
   chmod +x /opt/bin/weave
   cmd-bridge
 }
@@ -131,6 +132,8 @@ cmd-master() {
     node2=`sudo kubectl get nodes | grep democluster-node2`
     sleep 1
   done
+
+  sleep 5
 
   kubectl label --overwrite nodes democluster-node1 disktype=spinning
   kubectl label --overwrite nodes democluster-node2 disktype=ssd
