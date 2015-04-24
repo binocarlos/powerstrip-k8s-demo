@@ -11,7 +11,7 @@ We [recently showed](https://clusterhq.com/blog/migration-database-container-doc
 
 Ideally - we want to use both systems together so we can orchestrate AND migrate containers.  That is the aim of this demo, to show how using [Powerstrip](https://github.com/clusterhq/powerstrip), we can extend Docker with tools like [Flocker](https://github.com/clusterhq/flocker) and still use orchestration tools like [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
 
-We also need to network our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster - an ideal tool for this is [Weave](https://github.com/zettio/weave) which allows us to allocate an IP address per container.  In this example, we have fully integrated the [Weave](https://github.com/zettio/weave) network into [Kubernetes](https://github.com/googlecloudplatform/kubernetes) so each container is allocated an IP address from the weave bridge.
+We also need to network our [Kubernetes](https://github.com/googlecloudplatform/kubernetes) cluster - an ideal tool for this is [Weave](https://github.com/weaveworks/weave) which allows us to allocate an IP address per container.  In this example, we have fully integrated the [Weave](https://github.com/zettio/weave) network into [Kubernetes](https://github.com/googlecloudplatform/kubernetes) so each container is allocated an IP address from the weave bridge.
 
 ## Scenario
 
@@ -62,7 +62,7 @@ The next step is to SSH into the master node.
 $ vagrant ssh master
 ```
 
-We can now use the `kubectl` command to analyze our Kubernetes cluster:
+We can now use the `kubectl` command to control our Kubernetes cluster:
 
 ```bash
 master$ kubectl get nodes
@@ -87,7 +87,7 @@ We can check that those services were registered:
 master$ kubectl get services
 ```
 
-### Step 4: Start redis master
+### Step 4: Start redis master controller
 The next step is to start the redis master - we use a replication controller which has a nodeSelector set to `disktype=spinning`.
 
 ```bash
@@ -95,6 +95,8 @@ master$ kubectl create -f /vagrant/examples/guestbook/redis-master-controller.js
 ```
 
 Once we have done this we run `kubectl get pods` and wait for the redis-master to move from status `Pending` to status `Running`
+
+NOTE: it may take a short while before all pods enter the `Running` state.
 
 ### Step 5: Start PHP replication controller
 Now we start the PHP replication controller - this will start 3 PHP containers which all link to the redis-master service:
@@ -104,6 +106,8 @@ master$ kubectl create -f /vagrant/examples/guestbook/frontend-controller.json
 ```
 
 Once we have run this - we run `kubectl get pods` and wait for our PHP pods to be in the `Running` state.
+
+NOTE: it may take a short while before all pods enter the `Running` state.
 
 ### Step 6: Confirm location of redis-master
 
@@ -124,7 +128,7 @@ http://172.16.255.251:8000
 
 This will load the guestbook application - make a couple of entries clicking `Submit` after each entry.
 
-![screen shot](img/screenshot.png "fig 3. screen shot")
+![screen shot](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/screenshot.png "fig 3. screen shot")
 ###### *fig 3. screenshot of the guestbook app*
 
 ### Step 8: Migrate database
