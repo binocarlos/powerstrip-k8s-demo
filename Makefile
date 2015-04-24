@@ -1,5 +1,7 @@
 .PHONY: boot
 
+test:
+	bash admin/test.sh
 # if you vagrant halt -> then vagrant up
 # you MUST make boot afterwards to get everything spun up again
 boot:
