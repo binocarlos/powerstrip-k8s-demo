@@ -1,7 +1,10 @@
 .PHONY: boot
 
 test:
-	bash admin/test.sh
+	vagrant up
+	bash test.sh || (echo "bash test.sh failed $$?"; exit 1)
+	vagrant destroy
+
 # if you vagrant halt -> then vagrant up
 # you MUST make boot afterwards to get everything spun up again
 boot:
