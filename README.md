@@ -3,7 +3,7 @@
 ![warning](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/img/error.png "warning")
 **Please note:** *because this demo uses [Powerstrip](https://github.com/clusterhq/powerstrip), which is only meant for prototyping Docker extensions, we do not recommend this configuration for anything approaching production usage. When Docker extensions become official, [Flocker](https://github.com/clusterhq/flocker) will support them. Until then, this is just a proof-of-concept.*
 
-![tty demo](https://raw.github.com/binocarlos/powerstrip-k8s-demo/master/ttygif/anim.gif "fig 0. tty demo")
+[![asciicast](https://asciinema.org/a/18889.png)](https://asciinema.org/a/18889)
 
 We [recently showed](https://clusterhq.com/blog/migration-database-container-docker-swarm/) how you could use [Docker Swarm](https://github.com/docker/swarm) to migrate a database container and its volume between hosts using only the native [Docker Swarm](https://github.com/docker/swarm) CLI. Today we are going to show you how to do the same thing using only [Kubernetes](https://github.com/googlecloudplatform/kubernetes).
 
@@ -211,3 +211,23 @@ master$ sudo bash /vagrant/demo.sh up
 master$ sudo bash /vagrant/demo.sh switch
 master$ sudo bash /vagrant/demo.sh down
 ```
+
+## run tests
+
+To run the acceptance tests:
+
+```bash
+$ make test
+```
+
+This will `vagrant up` and then `bash test.sh`.
+
+`test.sh` will use `vagrant ssh -c ""` style commands to run through the following tests:
+
+ * a basic data migration using powerstrip-flocker
+ * launch the frontend and redis-master services and replication controllers
+ * write some data to the guestbook
+ * rewrite the redis-master rc
+ * kill the redis-master pod
+ * wait for the redis-master pod to be scheduled onto node2
+ * check for the data migrated from node2
